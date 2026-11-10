@@ -1,0 +1,16 @@
+node_modules
+.next
+out
+coverage
+playwright-report
+test-results
+*.tsbuildinfo
+npm-debug.log*
+.env
+.env.*
+!.env.example
+Dockerfile
+.dockerignore
+.git
+.idea
+.vscode

@@ -1,0 +1,94 @@
+# FlightPlan — one command: `docker compose up --build`
+#
+# Every default below is a DEMO-ONLY value so a fresh checkout runs with no .env file.
+# Override via a .env file (see .env.example) — never reuse these values in production.
+
+name: flightplan
+
+x-backend-env: &backend_env
+  DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://flightplan:demo_only_change_me@db:5432/flightplan} # demo only
+  AUTH_SECRET: ${AUTH_SECRET:-demo_secret_replace_for_production} # demo only
+  FLIGHTPLAN_DEMO_MODE: ${FLIGHTPLAN_DEMO_MODE:-true}
+  DEMO_PASSWORD: ${DEMO_PASSWORD:-FlightPlanDemo1!} # demo only
+  DEMO_AS_OF: ${DEMO_AS_OF:-2026-10-23T15:00:00Z}
+  CLINICAL_DATA_PROVIDER: ${CLINICAL_DATA_PROVIDER:-mock}
+  ENABLE_MYCHART_LOGIN: ${ENABLE_MYCHART_LOGIN:-false}
+  ENABLE_EPIC_LAUNCH: ${ENABLE_EPIC_LAUNCH:-false}
+  SESSION_TTL_HOURS: ${SESSION_TTL_HOURS:-12}
+
+x-backend-image: &backend_image
+  build: ./backend
+  image: flightplan-api:local
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: flightplan
+      POSTGRES_USER: flightplan
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-demo_only_change_me} # demo only
+    # No host port on purpose: Postgres is reachable only on the compose network.
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  migrate:
+    <<: *backend_image
+    command: ["uv", "run", "alembic", "upgrade", "head"]
+    environment: *backend_env
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  seed:
+    <<: *backend_image
+    command: ["uv", "run", "python", "-m", "app.seed"]
+    environment: *backend_env
+    restart: "no"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  api:
+    <<: *backend_image
+    command: ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
+    environment: *backend_env
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health', timeout=3)"]
+      interval: 5s
+      timeout: 5s
+      start_period: 10s
+      retries: 20
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_DEMO_MODE: ${NEXT_PUBLIC_DEMO_MODE:-true}
+    image: flightplan-web:local
+    restart: unless-stopped
+    environment:
+      BACKEND_URL: http://api:8080
+      NEXT_PUBLIC_DEMO_MODE: ${NEXT_PUBLIC_DEMO_MODE:-true}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false} # set true only behind HTTPS
+      SESSION_TTL_HOURS: ${SESSION_TTL_HOURS:-12}
+    ports:
+      - "3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

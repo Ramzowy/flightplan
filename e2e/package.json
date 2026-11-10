@@ -1,0 +1,16 @@
+{
+  "name": "flightplan-e2e",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "list": "playwright test --list",
+    "typecheck": "tsc --noEmit -p .",
+    "install-browsers": "playwright install chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.0",
+    "@types/node": "24.19.2",
+    "typescript": "5.9.3"
+  }
+}

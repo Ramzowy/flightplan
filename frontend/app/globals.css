@@ -1,0 +1,142 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------ */
+/* FlightPlan tokens (spec §8). Navy/teal are the primary app tokens;  */
+/* the UC red/black tokens are an optional co-branding accent only.    */
+/* ------------------------------------------------------------------ */
+:root {
+  --flightplan-bg: #071827;
+  --flightplan-shell: #0f2639;
+  --flightplan-panel: #11283c;
+  --flightplan-panel-raised: #19364c;
+  --flightplan-panel-soft: #1c3a52;
+  --flightplan-line: #2c4b63;
+  --flightplan-track: #3a5a72;
+  --flightplan-accent-teal: #20dbcf;
+  --flightplan-complete: #55d5a5;
+  --flightplan-current: #5db8f5;
+  --flightplan-info-card: #ddeef6;
+  --flightplan-info-card-strong: #def1fa;
+  --flightplan-ink-on-light: #102d42;
+  --flightplan-muted-on-light: #57738a;
+  --flightplan-text: #f2f8fc;
+  --flightplan-text-muted: #a9c1d3;
+  --flightplan-amber: #f4c76a;
+  --flightplan-chip-confirmed: #dcf7ea;
+  --flightplan-chip-confirmed-ink: #0b3b2a;
+  --flightplan-chip-planned: #fff0c9;
+  --flightplan-chip-planned-ink: #4a3500;
+  --flightplan-chip-restricted: #ece4fb;
+  --flightplan-chip-restricted-ink: #2e1f4d;
+  --flightplan-chip-rejected: #fde2e4;
+  --flightplan-chip-rejected-ink: #6b0f1a;
+  --flightplan-chip-estimate: #d6ebfb;
+  --flightplan-chip-estimate-ink: #0b3150;
+  --flightplan-focus: #ffd166;
+
+  --uc-optional-red: #e00122;
+  --uc-optional-black: #000000;
+  --uc-optional-white: #ffffff;
+
+  color-scheme: dark;
+}
+
+/* High contrast: stronger text, borders and pure light cards. */
+:root:has(.fp-high-contrast) {
+  --flightplan-bg: #000000;
+  --flightplan-shell: #050f18;
+  --flightplan-panel: #0a1a28;
+  --flightplan-panel-raised: #102638;
+  --flightplan-panel-soft: #102638;
+  --flightplan-line: #9fc3dc;
+  --flightplan-track: #8aa6bb;
+  --flightplan-info-card: #ffffff;
+  --flightplan-info-card-strong: #ffffff;
+  --flightplan-ink-on-light: #000000;
+  --flightplan-muted-on-light: #1e3446;
+  --flightplan-text: #ffffff;
+  --flightplan-text-muted: #e2eef6;
+}
+
+/* Larger text scales every rem-based size. */
+:root:has(.fp-text-large) {
+  font-size: 112.5%;
+}
+:root:has(.fp-text-extra-large) {
+  font-size: 125%;
+}
+
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --color-fp-bg: var(--flightplan-bg);
+  --color-fp-shell: var(--flightplan-shell);
+  --color-fp-panel: var(--flightplan-panel);
+  --color-fp-raised: var(--flightplan-panel-raised);
+  --color-fp-soft: var(--flightplan-panel-soft);
+  --color-fp-line: var(--flightplan-line);
+  --color-fp-track: var(--flightplan-track);
+  --color-fp-teal: var(--flightplan-accent-teal);
+  --color-fp-complete: var(--flightplan-complete);
+  --color-fp-current: var(--flightplan-current);
+  --color-fp-info: var(--flightplan-info-card);
+  --color-fp-info-strong: var(--flightplan-info-card-strong);
+  --color-fp-ink: var(--flightplan-ink-on-light);
+  --color-fp-muted: var(--flightplan-muted-on-light);
+  --color-fp-text: var(--flightplan-text);
+  --color-fp-subtle: var(--flightplan-text-muted);
+  --color-fp-amber: var(--flightplan-amber);
+  --color-fp-focus: var(--flightplan-focus);
+  --color-chip-confirmed: var(--flightplan-chip-confirmed);
+  --color-chip-confirmed-ink: var(--flightplan-chip-confirmed-ink);
+  --color-chip-planned: var(--flightplan-chip-planned);
+  --color-chip-planned-ink: var(--flightplan-chip-planned-ink);
+  --color-chip-restricted: var(--flightplan-chip-restricted);
+  --color-chip-restricted-ink: var(--flightplan-chip-restricted-ink);
+  --color-chip-rejected: var(--flightplan-chip-rejected);
+  --color-chip-rejected-ink: var(--flightplan-chip-rejected-ink);
+  --color-chip-estimate: var(--flightplan-chip-estimate);
+  --color-chip-estimate-ink: var(--flightplan-chip-estimate-ink);
+  --color-uc-red: var(--uc-optional-red);
+  --color-uc-black: var(--uc-optional-black);
+
+  --radius-card: 1.125rem;
+  --radius-panel: 1.25rem;
+}
+
+html {
+  background: var(--flightplan-bg);
+}
+
+body {
+  background:
+    radial-gradient(1200px 600px at 10% -10%, #0e2a40 0%, transparent 60%),
+    var(--flightplan-bg);
+  color: var(--flightplan-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Visible, consistent keyboard focus everywhere. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--flightplan-focus);
+  outline-offset: 3px;
+  border-radius: 0.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.sr-only-focusable:not(:focus):not(:focus-within) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
